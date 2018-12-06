@@ -1,0 +1,76 @@
+;fat32结构定义如下
+;typedef struct{//79字节
+;	byte2	sectorSize;		//每扇区字节数=512
+;	byte	clusterSectorNum;		//每簇扇区数=8
+;	byte2	keepSectorNum;		//保留扇区数=0x800
+;	byte	fatNum;			//fat数=2
+;	byte2	a;//fat16 use
+;	byte2	b;//fat16 use
+;	byte	diskMedia;		//磁盘介质0xf8
+;	byte2	c;//fat16 use
+;	byte2	trackSectorNum;		//每个磁道扇区数=0x3f
+;	byte2	headerNum;		//磁头数=0xff
+;	byte4	hiddenSectorNum;		//当前分区隐藏扇区数=0x3f
+;	byte4	diskSectorNum;		//磁盘扇区总数=0x00f07fc1
+;
+;	byte4	fatSectorNum;		//每个fat表扇区数=0x3c00
+;	byte2	flag;			//标记=0
+;	byte2	version;			//版本=0
+;	byte4	rootClusterNum;		//根目录入口簇号=2
+;	byte2	fileSectorNum;		//文件系统扇区号=1
+;	byte2	backupDBR;		//备份引导扇区位置=6
+;	char	e[12];//fat16use
+;	byte	biosDiskNum;		//BIOS驱动器号=8
+;	byte	f;//fat16 use
+;	byte	extendedBootFlag;		//扩展引导标志=0x29
+;	byte4	fatDiskSeriesNum;		//fat格式磁盘系列号=0x6c2e5c3e
+;	char	fatName[11];		//fat32卷标明=NO NAME    
+;	char	fatDiskSign[8];		//fat32磁盘格式标志=FAT32   
+;}fat32BPB;
+根目录起始扇区 = 保留扇区数 +  隐藏扇区数+ 一个FAT的扇区数 × FAT表个数 + (起始簇号-2) x 每簇的扇区数
+
+fat32中短文件名的结构，32字节
+struct shortFileName{
+char	name[8];		//文件名
+char	exname[3];	//扩展名
+byte	attribute;		//属性	00000000b	读写
+			//	00000001b	只读
+			//	00000010b	隐藏
+			//	00000100b	系统
+			//	00001000b	卷标
+			//	00010000b	子目录
+			//	00100000b	归档
+byte	sysSave;		//系统保留
+byte	creatTimeMS;	//创建时间的毫秒位
+byte2	creatTime;	//文件创建时间
+byte2	creatData;	//创建日期
+byte2	endTime;		//文件的最后访问日期
+byte2	startFileClusterH16;	//文件起始簇号高16位
+byte2	modifyTime;	//文件的最近修改时间
+byte2	modifyData;	//文件的最近修改日期
+byte2	startFileClusterL16;	//文件起始簇号低16位
+byte4	fileSize;		//文件的长度
+};
+
+fat32中长文件名的结构，32字节
+struct longFileName{
+byte	attribute;		//属性，bit6=1：表示长文件的最后一个目录项，bit0~bit4:顺序号数值
+char	fileName1[10];	//长文件名Unicode码
+byte	flag;//=0x0f;	//长文件名标志
+byte	sysSave;		//系统保留
+byte	check;		//校验值
+char	fileName2[12];	//长文件名Unicode码
+byte2	startFileClusterL;//=0，文件起始簇号
+char	fileName3[4];	//长文件名Unicode码
+};
+
+
+
+
+
+
+
+
+
+
+
