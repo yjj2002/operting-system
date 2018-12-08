@@ -72,10 +72,17 @@ support:
 ;这一段留给加载内核的程序
 
 ;从键盘获取信息,0x60为数据端口，0x64为命令端口
+l1:
+in al,0x64
+and al,0x01
+cmp al,0	;为0说明可读
+jne next
+jmp l1
+next:
 in al,0x60
-
-
-
+mov ah,0x20
+call print_char
+jmp l1
 
 spin:
 hlt
