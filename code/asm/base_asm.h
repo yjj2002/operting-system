@@ -1,37 +1,51 @@
-#include"./../macro/datatype.h"
-inline void asm_cpu_hlt(void)
-{
-    __asm__ __volatile__ ("hlt");
-}
+/*一些C语言中无法实现的汇编指令*/
+/*汇编指令实现*/
+#define __asm__ asm
+#define __volatile__ volatile
+typedef unsigned char uint8;    //8位无符号整数
+typedef unsigned short uint16;   //16位无符号整数
+typedef unsigned int uint32;     //32位无符号整数
+typedef unsigned long uint64;    //64位无符号整数
 
-inline void asm_cli(void)
+typedef uint32 uint;
+
+/*hlt指令*/
+static inline void asm_cpu_hlt(void)
+{
+    __asm__ __volatile__("hlt");
+}
+/*清中断指令*/
+static inline void asm_cli(void)
 {
     __asm__ __volatile__("cli");
 }
-
-inline void asm_sti(void)
+/*开中断*/
+static inline void asm_sti(void)
 {
     __asm__ __volatile__("sti");
 }
-
-inline void asm_lgdt(void)
+/*8位读端口指令*/
+static inline void asm_inb(uint8 *al,uint32 edx)
 {
-    __asm__ __volatile__("lgdt");
+    __asm__ __volatile__("in %%dx,%0":"=a"(al):"d"(edx));
+}
+/*16位读端口指令*/
+static inline void asm_inw(uint16 *ax,uint16 edx)
+{
+    __asm__ __volatile__("in %%dx,%0":"=a"(ax):"d"(edx));
+}
+/*8位写端口指令*/
+static inline void asm_outb(uint8 *al,uint32 edx)
+{
+    __asm__ __volatile__("out %0,%%dx":"=a"(al):"d"(edx));
+}
+/*16位写端口指令*/
+static inline void asm_outw(uint16 *ax,uint32 edx)
+{
+    __asm__ __volatile__("out %0,%%dx":"=a"(ax):"d"(edx));
 }
 
-inline void asm_inb(uint8* al,uint32 edx)
+static inline void asm_int(const uint var)
 {
-    __asm__ __volatile__("inb %%edx,%0":"=a"(al):"d"(edx));
-}
-
-inline uint16 asm_inw(uint32 edx)
-{
-    uint16 ax;
-    __asm__ __volatile__("inw %%edx,%0":"=a"(ax):"d"(edx));
-}
-
-inline uint32 asm_ind(uint32 edx)
-{
-    uint32 eax;
-    __asm__ __volatile__("inl %%edx,%0":"=a"(eax):"d"(edx));
+    __asm__ __volatile__("int %0"::"N"(var));
 }

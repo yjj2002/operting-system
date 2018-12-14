@@ -31,6 +31,7 @@ int 1
 ;16位的描述符选择子：32位偏移
 ;jmp,清流水线并串行化处理器
 jmp dword 0x8:flush
+
 ;进入保护模式
 use32
 flush:
@@ -70,19 +71,12 @@ support:
 	call print_string
 
 ;这一段留给加载内核的程序
-
-;从键盘获取信息,0x60为数据端口，0x64为命令端口
-l1:
-in al,0x64
-and al,0x01
-cmp al,0	;为0说明可读
-jne next
-jmp l1
-next:
-in al,0x60
-mov ah,0x20
-call print_char
-jmp l1
+mov ebx,34
+mov ecx,2
+mov ax,100000b
+mov es,ax
+mov edi,0
+call read_disk
 
 spin:
 hlt
@@ -97,6 +91,6 @@ include 'fun32.inc'
 align 16
 ;GDT表将被加载到0x1000扇区
 gdt_size:
-dw 39
+dw 55
 dd GDT_ADDRESS
 

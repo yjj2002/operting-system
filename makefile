@@ -1,29 +1,31 @@
 boot=code\boot
-dev=device
 bin=bin
-
-
-#编译选项
-GCC_option=-nostdinc -fno-stack-protector -fno-tree-ch -Wall -Wno-format -Wno-unused -Werror -gstabs -m32 -fno-omit-frame-pointer -DJOS_KERNEL -gstabs -c -o
-LD_option=-m elf_i386 -N -e entry -Ttext 0 -o
-OBJ_option=-S -O binary -j .text -j .data
 #源文件路径
 bootasm=$(boot)\boot.asm
 headasm=$(boot)\head.asm
 GDTlist=$(boot)\GDTlist.asm
 
-key=$(dev)\keyboard.c
 #二进制文件路径
 bootbin=$(bin)\boot.bin
 headbin=$(bin)\head.bin
-bootloder=$(bin)\bootloder.bin
-GDT_list_init=$(bin)\GDTlist.bin
+bootloder=$(bin)\bootloder.bin		#将boot和head合并为一个，方便备份
+GDT_list_init=$(boot)\GDTlist.bin
 
-keybin=$(bin)\keyboard.bin
+
+test=$(bin)\test.bin
 #镜像文件
 img=lindorx.img
 
-$(img):$(bootbin) $(headbin) $(GDT_list_init)
+#编译器选项
+GCC_LIST=-nostdinc -fno-stack-protector -fno-tree-ch -Wall -Wno-format -Wno-unused -Werror -gstabs -m32 -fno-omit-frame-pointer -DJOS_KERNEL -gstabs -c -o 
+LD_LIST=-m i386pe -N -e _sysmain -Ttext 0 -o
+
+cle_all:
+	make cle
+	make $(img)
+	make dbg
+
+$(img):$(bootbin) $(headbin) $(GDT_list_init) $(test)
 	dd if=/dev/zero of=$(img) bs=512 count=50
 #合并boot.bin和head.bin
 	copy $(bootbin)/b+$(headbin)/b $(bootloder)
@@ -32,9 +34,9 @@ $(img):$(bootbin) $(headbin) $(GDT_list_init)
 	dd if=$(bootloder) of=$(img) conv=notrunc skip=0 seek=16 bs=512 count=16
 #将初始化时的GDT表写入32~33扇区
 	dd if=$(GDT_list_init) of=$(img) conv=notrunc skip=0 seek=32 bs=512 count=2
-	
+#将测试文件加载到34~35扇区
+	dd if=$(test) of=$(img) conv=notrunc skip=0 seek=34 bs=512 count=2
 
-#*******************bootloder*************************************
 $(bootbin):$(bootasm)
 	fasm $(bootasm) $(bootbin)
 $(headbin):$(headasm)
@@ -42,11 +44,10 @@ $(headbin):$(headasm)
 $(GDT_list_init):$(GDTlist)
 	fasm $(GDTlist) $(GDT_list_init)
 
-#******************kernel******************************************
-$(keybin):$(key)
-	gcc $(GCC_option) keyboard.o $(key)
-	ld $(LD_option) keyboard.out keyboard.o
-	objcopy $(OBJ_option) keyboard.out keybin
+$(test):code/device/keyboard.c
+	gcc $(GCC_LIST) key.o code/device/keyboard.c
+	ld $(LD_LIST) key.out key.o
+	objcopy -S -O binary -j .text -j .data key.out $(test)
 
 bochs:$(img)
 	bochs -f bochsrc.txt
