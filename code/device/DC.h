@@ -1,0 +1,1 @@
+int sysDiskRead(int sector,uint8 size,uint mem);

@@ -94,3 +94,8 @@ gdt_size:
 dw 55
 dd GDT_ADDRESS
 
+times 7168-($-$$) db 0
+
+include 'GDTlist.inc'
+
+times 7680-($-$$) db 0

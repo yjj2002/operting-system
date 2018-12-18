@@ -1,15 +1,24 @@
-/*键盘控制函数，用来从键盘获取输入的字符并返回给调用的函数*/
 #include"./../asm/base_asm.h"
-#include"./../macro/datatype.h"
-int sysmain()
+#include"DC.h"
+
+/*磁盘读取函数
+*sector:起始扇区；
+*size：读取扇区数
+*mem：待写入内存区域（处于平坦模型下时）
+*/
+#define DISK_PORT0  0x1f0
+#define DISK_PORT1  0x1f1
+#define DISK_PORT2  0x1f2
+#define DISK_PORT3  0x1f3
+#define DISK_PORT4  0x1f4
+#define DISK_PORT5  0x1f5
+#define DISK_PORT6  0x1f6
+#define DISK_PORT7  0x1f7
+int sys()
 {
-    /*0x60为键盘控制器的数据端口，0x64为键盘控制器的命令端口*/
-    /*读取i8042的状态寄存器*/
-    //显示字符
-    char* cbuf;
-    cbuf=(char*)0xb8000;
-    *cbuf='2';
-    cbuf++;
-    *cbuf='2';
-    return 0;
+        sysDiskRead(0,2,0xb8000);
+        while(1){
+                asm_cpu_hlt();
+        }
+        return 0;
 }

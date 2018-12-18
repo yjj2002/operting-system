@@ -8,6 +8,7 @@ typedef unsigned int uint32;     //32位无符号整数
 typedef unsigned long uint64;    //64位无符号整数
 
 typedef uint32 uint;
+typedef uint8 byte;
 
 /*hlt指令*/
 static inline void asm_cpu_hlt(void)
